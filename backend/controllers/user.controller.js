@@ -2,6 +2,8 @@
 import { User } from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
+import cloudinary from "../utils/cloudinary.js";
+import getDataUri from "../utils/dataUriParser.js";
 // import cookie from 'cookie-parser';
 
 
@@ -16,6 +18,11 @@ export const register= async(req,res)=>{
             });
 
         };
+        const file = req.file;
+        //cloudniary ayega idhr
+        const fileUri = getDataUri(file);
+        const cloudResponse= await cloudinary.uploader.upload(fileUri.content);
+
         const user=await User.findOne({email});
         if(user){
             return res.status(400).json({
@@ -31,6 +38,9 @@ export const register= async(req,res)=>{
             phoneNumber,
             password:hashedPassword,
             role,
+            profile:{
+                profilePhoto:cloudResponse.secure_url,
+            },
         })
         return res.status(201).json({
             message:"Account created successfully",
@@ -110,6 +120,14 @@ export const logout=async(req,res)=>{
 export const updateProfile=async (req,res)=>{
     try{
         const {fullName,email,phoneNumber,bio,skills}=req.body;
+        
+        const file = req.file;
+        //cloudniary ayega idhr
+        const fileUri = getDataUri(file);
+        const cloudResponse= await cloudinary.uploader.upload(fileUri.content);
+
+
+
         let skillsArray;
         if(skills){
             skillsArray=skills.split(",");
@@ -122,11 +140,17 @@ export const updateProfile=async (req,res)=>{
               success:false,  
             })
         }
-        if(fullName) user.fullName=fullName
-        if(email) user.email=email
-        if(phoneNumber) user.phoneNumber=phoneNumber
-        if(bio) user.bio=bio
-        if (skills) user.profile.skills=skillsArray
+        if(fullName) user.fullName=fullName;
+        if(email) user.email=email;
+        if(phoneNumber) user.phoneNumber=phoneNumber;
+        if(bio) user.profile.bio=bio;
+        if (skills) user.profile.skills=skillsArray;
+
+        //resume comes later here..
+        if(cloudResponse){
+            user.profile.resume=cloudResponse.secure_url;//save the cloudnaruy url
+            user.profile.resumeOriginalName=file.originalname;//save the original name
+        }
         await user.save();
 
         user={

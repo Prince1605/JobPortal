@@ -3,10 +3,32 @@ import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "../ui/button";
 import { LogOut, User2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import axios from "axios";
+import { USER_API_END_POINT } from "../../../utils/constant";
+import { setUser } from "../../../redux/authSlice";
 
 function Navbar() {
-    let [user,setUser]=useState(false);
+    // let [user,setUser]=useState(false);
+    const {user}=useSelector(store=>store.auth);
+    const dispatch=useDispatch();
+    const navigate=useNavigate();
+    const logoutHandler=async()=>{
+      try{
+        const res=await axios.get(`${USER_API_END_POINT}/logout`,{withCredentials:true});
+        if(res.data.success){
+          dispatch(setUser(null));
+          navigate("/");
+          toast.success(res.data.message)
+        }
+
+      }catch(error){
+        console.log(error);
+        toast.error(error.response.data.message);
+      }
+    }
 
   return (
     <div className="bg-white">
@@ -34,31 +56,31 @@ function Navbar() {
           <Popover>
             <PopoverTrigger asChild>
               <Avatar className="cursor-pointer">
-                <AvatarImage src="https://github.com/shadcn.png" />
+                <AvatarImage src={user?.profile?.profilePhoto} />
               </Avatar>
             </PopoverTrigger>
 
             <PopoverContent className="w-88">
               <div className="flex gap-2 space-y-2">
                 <Avatar className="cursor-pointer">
-                  <AvatarImage src="https://github.com/shadcn.png" />
+                  <AvatarImage src={user?.profile?.profilePhoto} />
                 </Avatar>
 
                 <div>
-                  <h4 className="font-medium">Prince Mishra</h4>
-                  <p>Lorem ipsum dolor sit amet.</p>
+                  <h4 className="font-medium">{user?.fullName}</h4>
+                  <p>{user?.profile?.bio}</p>
                 </div>
               </div>
 
               <div className="flex flex-col text-gray-600">
                 <div className="flex w-fit items-center gap-2 cursor-pointer">
                   <User2 />
-                  <Button variant="link">View Profile</Button>
+                  <Button variant="link"> <Link to={'/profile'}>View Profile</Link></Button>
                 </div>
 
                 <div className="flex w-fit items-center gap-2 cursor-pointer">
                   <LogOut />
-                  <Button variant="link">Logout</Button>
+                  <Button onClick={logoutHandler} variant="link">Logout</Button>
                 </div>
               </div>
             </PopoverContent>
