@@ -21,7 +21,7 @@ const _dirname=path.resolve();
 
 //using cors
 const corsOptions={
-  origin: 'http://localhost:5173',
+  origin: 'https://jobportal-prince.onrender.com',
   credentials:true,
 }
 
