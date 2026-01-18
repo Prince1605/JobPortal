@@ -1,14 +1,14 @@
 import React from 'react'
 import LatestJobCards from './LatestJobCards';
 import { useSelector } from 'react-redux';
-import useGetAllJobs from '@/hooks/useGetAllJobs';
+
 
 
 // let randomJobs=[1,2,3,4,5,6,7,8,9];
 
 
 const LatestJob = () => {
-  useGetAllJobs();
+
 const {allJobs}=useSelector(store=>store.job);
   return (
     <div className='max-w-6xl mx-auto my-20'>

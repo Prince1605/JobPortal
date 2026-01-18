@@ -91,22 +91,24 @@ export const getJobsById = async(req,res)=>{
     }
 }
 //Admin Jobs
-export const getAdminJobs = async (req,res)=>{
-    try{
-        const adminId=req.id;
-        const jobs=await Job.find({created_by:adminId});
-        if(!jobs){
-            res.status(404).json({
-                message:"jobs not found",
-                success:false
-            });
-        }
-        return res.status(200).json({
-            jobs,
-            status:true
-        })
-    }
-    catch(error){
-        console.log(error)
-    }
-}
+export const getAdminJobs = async(req,res)=>{
+  try{
+       const adminId = req.id;
+       const jobs = await Job.find({created_by:adminId}).populate({
+        path:'company',
+        createdAt:-1
+       });
+       if(!jobs){
+        return res.status(404).json({
+          message:"Job not found",
+          success:false
+       })
+      };
+      return res.status(200).json({
+        jobs,
+        success:true
+      })
+  }catch(error){
+    console.log(error);
+  }
+};
